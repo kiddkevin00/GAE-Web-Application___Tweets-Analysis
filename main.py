@@ -51,6 +51,8 @@ class MainHandler(webapp2.RequestHandler):
 		submitted_keyword = self.request.get("keyword")
 		logging.debug("keyword : "+submitted_keyword)
 		if (submitted_keyword):
+			caches = memcache.get(submitted_keyword) 
+			
 			tweet_query = Tweet.query(ancestor=parent_key(submitted_keyword))	
 			tweets = tweet_query.fetch()
 			logging.debug(len(tweets))
