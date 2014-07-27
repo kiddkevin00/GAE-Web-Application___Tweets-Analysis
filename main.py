@@ -52,14 +52,14 @@ class MainHandler(webapp2.RequestHandler):
 		logging.debug("keyword : "+submitted_keyword)
 		if (submitted_keyword):
 			caches = memcache.get(submitted_keyword) 
-			
+
 			tweet_query = Tweet.query(ancestor=parent_key(submitted_keyword))	
 			tweets = tweet_query.fetch()
 			logging.debug(len(tweets))
 			for tweet in tweets:
 				logging.debug(tweet)
-
-
+		else: 
+			logging.debug("no user's input")
 
 		template_values = {
 
@@ -99,9 +99,16 @@ class TweetStore(webapp2.RequestHandler):
 						tweets.append(tweet)
 						logging.debug(len(tweets))
 			ndb.put_multi(tweets)
-		self.redirect('/')
+		
+		template_values = {
+
+		}
+		template = JINJA_ENVIRONMENT.get_template('data-save.html')
+		self.response.write(template.render(template_values))
+
+		#self.redirect('/')
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-    ('/savedata', TweetStore)
+    ('/data-save', TweetStore)
 ], debug=True)
