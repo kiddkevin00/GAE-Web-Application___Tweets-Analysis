@@ -29,6 +29,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 	extensions=['jinja2.ext.autoescape'],
 	autoescape=True)
 
+# (TODO) Must contain data in inside this file, don't know why..
 STORE_DATA_PATH = "data/"
 
 # define a seperator for reading file contents
@@ -51,6 +52,7 @@ class MainHandler(webapp2.RequestHandler):
 		submitted_keyword = self.request.get("keyword")
 		logging.debug("keyword : "+submitted_keyword)
 		if (submitted_keyword):
+			# TODO..
 			caches = memcache.get(submitted_keyword) 
 
 			tweet_query = Tweet.query(ancestor=parent_key(submitted_keyword))	
@@ -72,40 +74,70 @@ class TweetStore(webapp2.RequestHandler):
 	def get(self):
 		global STORE_DATA_PATH
 		logging.debug("here is TweetStore..")
+		selected_file = self.request.get("selected")
+		logging.debug("Selected File : " + selected_file)
+		save = self.request.get("save") 
+		logging.debug("Save choice : " + save) 
+
+		# (TODO) show what is in the current Database..
+		# if (selected_file):
+		# 	tweet_query = Tweet.query(ancestor=parent_key(selected_file))	
+		# 	tweets_result = tweet_query.fetch()
+		# 	logging.debug("How many tweets in this file : " + str(len(tweets_result)))
+		# 	for tweet in tweets_result:
+		# 		logging.debug(tweet)
+		# else: 
+		# 	logging.debug("no user's input")
+
+		view_tweets = []
+		files = [] 
 		for file in os.listdir(STORE_DATA_PATH):
+			logging.debug("file name : " + file)
+
 			# assign parent key for each entity 
 			tweet_parent_name = file[:-4]
 
-			tweets = []
-			logging.debug("file name : " + file)
-			with open(STORE_DATA_PATH + file, "r") as infile:
-				# similar to "GROUP BY", but search for the same key sequentially
-				# Here grouping the not empty lines together   
-				for key, group in itertools.groupby(infile, isa_group_separator):
-					if not key:
-						tweet = Tweet(parent=parent_key("key04"))
-						for item in group:
-							field, value = item.split(" : ")
-							# strip all the white_space
-							value = value.strip()
-							# can't use "," to seperate varible like "print" does
-							logging.debug(field + value)
-							if field == "Tweet":
-								tweet.tweet = value
-							elif field == "Created at":
-								tweet.creat_at = value
-							else: 
-								self.redirect("/?error=1")
-						tweets.append(tweet)
-						logging.debug(len(tweets))
-			ndb.put_multi(tweets)
-		
+			save_tweets = []
+			files.append(tweet_parent_name)
+			if (tweet_parent_name == selected_file):
+				with open(STORE_DATA_PATH + file, "r") as infile:
+					# similar to "GROUP BY", but search for the same key sequentially
+					# Here groups the not empty lines together   
+					for key, group in itertools.groupby(infile, isa_group_separator):
+						if not key:
+							tweet = Tweet(parent=parent_key(tweet_parent_name))
+							view_tweet = []
+							for item in group:
+								field, value = item.split(" : ")
+								# strip all the white_space
+								value = value.strip()
+								# can't use "," to seperate varible like "print" does
+								logging.debug(field + " : " + value)
+								if field == "Tweet":
+									tweet.tweet = value
+									view_tweet.append(value)
+								elif field == "Created at":
+									tweet.creat_at = value
+									view_tweet.append(value)
+								else: 
+									self.redirect("/?error=1")
+							view_tweets.append(view_tweet)
+							logging.debug("Number of tweets for preview : " + str(len(view_tweets)))
+							if save == "true":
+								save_tweets.append(tweet)
+							logging.debug("Number of To_Save Tweets : " + str(len(save_tweets)))
+				logging.debug("might save a file to Datastore..")
+				ndb.put_multi(save_tweets)
+		logging.debug("passing files paramter's size : " + str(len(files)))
+		logging.debug("passing view_tweets paramter's size: " + str(len(view_tweets)))
+		# logging.debug(view_tweets[0])
 		template_values = {
-
+			'files': files,
+			'selected_file': selected_file,
+			'view_tweets': view_tweets
 		}
 		template = JINJA_ENVIRONMENT.get_template('data-save.html')
 		self.response.write(template.render(template_values))
-
 		#self.redirect('/')
 
 app = webapp2.WSGIApplication([
