@@ -33,7 +33,8 @@ class listener(StreamListener):
 		try:
 			if type(data) is str:
 				#print data
-				tweet =  data.split(',"text":"')[1].split('","source":')[0]
+				# (TODO) need to strip all the escape words..
+				tweet =  data.split(',"text":"')[1].split('","source":')[0].replace("\\", "")
 				created_at = data.split('"created_at":"')[1].split('","id":')[0]
 				#print tweet
 				#print created_at
@@ -65,14 +66,14 @@ def main():
 	print "This tool can can help you retreive Twitter's data through Twitter API"
 	print "starting.."
 
-	save_file_name = raw_input("Please enter a file name to save as : ")
+	save_file_name = raw_input("Please enter a file name to save as : ").strip()
 
 	relativePath = os.path.join(SAVE_PATH, save_file_name+".txt")   
 	if os.path.exists(relativePath):
 		os.remove(relativePath)
 
 	# keyword for searching  
-	keyword = raw_input("What do you wanna search this time?  ")
+	keyword = raw_input("What do you wanna search this time?  ").strip()
 
 	auth = OAuthHandler(ckey, csecret)
 	auth.set_access_token(atoken, asecret)
