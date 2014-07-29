@@ -35,11 +35,20 @@
   //console.log(view_tweets[0][0]);
 
   $(document).ready(function() {
-    $('a').click(function() {
+    $('a.main-feature').click(function() {
       // remove other "a" elements' class: active 
       $(this).parent().parent().children().removeClass('active')
       $(this).parent().addClass('active');
-      
+      // TODO..
+      return false;
+    });
+
+    $('a.setting').click(function() {
+      // remove other "a" elements' class: active 
+      $(this).parent().parent().children().removeClass('active')
+      $(this).parent().addClass('active');
+      // TODO..
+      return false;
     });
   });
 
@@ -47,16 +56,32 @@
   </script>
 
   <style type="text/css">
-  a {
+  a.setting {
     -webkit-transition: width 0s; /* For Safari 3.1 to 6.0 */
     transition: width 0s;
   }
 
-  a:hover {
-    background-color: blue;
-    border: 2px solid blue;
-    color: blue;
+  a.main-feature {
+    -webkit-transition: width 0s; /* For Safari 3.1 to 6.0 */
+    transition: width 0s;
   }
+
+  /* can't have space between "colon" and "hover" */
+  ul.navbar-right li a.setting:hover {
+    /* can't use color name ex. background-color: blue; */
+    background-color: #3F3F3F;
+    color: white;
+  }
+
+  div.sidebar > ul > li > a:hover {
+    color: white;
+    background-color: #99CCFF;
+  }
+
+  div.nav-sidebar > .active > a:hover {
+     background-color: #428bca
+  }
+
   </style>
 
 </head>
@@ -76,10 +101,10 @@
       </div>
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="#">Dashboard</a></li>
-          <li><a href="#">Settings</a></li>
-          <li><a href="#">Profile</a></li>
-          <li><a href="#">Help</a></li>
+          <li class="active"><a class="setting" href="#">Dashboard</a></li>
+          <li><a class="setting" href="#">Settings</a></li>
+          <li><a class="setting" href="#">Profile</a></li>
+          <li><a class="setting" href="#">Help</a></li>
         </ul>
         <form class="navbar-form navbar-right">
           <input type="text" class="form-control" placeholder="Search...">
@@ -92,10 +117,10 @@
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
         <ul class="nav nav-sidebar">
-          <li class="active"><a href="#">Overview</a></li>
-          <li><a href="#">Reports</a></li>
-          <li><a href="#">Analytics</a></li>
-          <li><a href="#">Export</a></li>
+          <li class="active"><a class="main-feature" href="#">Overview</a></li>
+          <li><a class="main-feature" href="#">Reports</a></li>
+          <li><a class="main-feature" href="#">Analytics</a></li>
+          <li><a class="main-feature" href="#">Export</a></li>
         </ul>
 
         <ul class="nav nav-sidebar">
@@ -167,19 +192,19 @@
               </tr>
             </thead>
             <tbody>
-                {% for view_tweet in view_tweets %}
+              {% for view_tweet in view_tweets %}
+              <tr>
+                <td>0000</td>
+                <td style="width:750px; padding:0;">{{ view_tweet[0] }}</td>
+                <td style="width:250px; padding:0;">{{ view_tweet[1] }}</td>
                 <tr>
-                  <td>0000</td>
-                  <td style="width:750px;">{{ view_tweet[0] }}</td>
-                  <td style="width:250px;">{{ view_tweet[1] }}</td>
-                <tr>
-                {% endfor %}
-            </tbody>
-          </table>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-</body>
-</html>
+    </body>
+    </html>
