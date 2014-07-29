@@ -83,17 +83,25 @@ class TweetStore(webapp2.RequestHandler):
 
 		view_tweets = []
 		# view the data storing in the current Database..
-		if (view_database == "true") and (selected_file): 
-			tweet_query = Tweet.query(ancestor=parent_key(selected_file))	
-			tweets_result = tweet_query.fetch()
-			logging.debug("How many tweets store in this file at Database: " + str(len(tweets_result)))
-			for tweet_result in tweets_result:
-				logging.debug(tweet_result)
-				view_tweet = []
-				view_tweet.append(tweet_result.tweet)
-				view_tweet.append(tweet_result.created_at)
-				view_tweets.append(view_tweet)
-				logging.debug("Number of tweets for preview : " + str(len(view_tweets)))
+		if (view_database == "true") and (selected_file):
+			view_tweets = memcache.get(selected_file)
+			if not view_tweets:
+				logging.debug('cache miss!')
+				# since "view_tweets is None" now
+				view_tweets = []
+				tweet_query = Tweet.query(ancestor=parent_key(selected_file))	
+				tweets_result = tweet_query.fetch()
+				logging.debug("How many tweets store in this file at Database: " + str(len(tweets_result)))
+				for tweet_result in tweets_result:
+					logging.debug(tweet_result)
+					view_tweet = []
+					view_tweet.append(tweet_result.tweet)
+					view_tweet.append(tweet_result.created_at)
+					view_tweets.append(view_tweet)
+					logging.debug("Number of tweets for preview : " + str(len(view_tweets)))
+				memcache.add(selected_file, view_tweets)
+			else:
+				logging.debug("Cache hit!!")
 
 		# for storing and viewing files at the local directory 
 		files = [] 
