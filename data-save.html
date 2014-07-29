@@ -4,7 +4,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="">
   <meta name="author" content="">
-  <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
+  <!-- still figuring out how to change website's icon -->
+  <!-- <link rel="shortcut icon" href="./img/icon01.jpeg"> -->
 
   <title>Dashboard Template for Bootstrap</title>
 
@@ -14,7 +15,7 @@
   <!-- Custom styles for this template -->
   <link href="./stylesheets/dashboard.css" rel="stylesheet">
 
-  
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
   <script type="text/javascript">
   var files = [];
   // "parameter|safe" to strip all the single quotes
@@ -30,9 +31,9 @@
   var view_tweets = [];
   view_tweets = {{ view_tweets|safe }};
   console.log(view_tweets);
-  console.log(view_tweets[0][1]);
-  console.log(view_tweets[0][0]);
-  
+  //console.log(view_tweets[0][1]);
+  //console.log(view_tweets[0][0]);
+
 
   </script>
 
@@ -78,13 +79,16 @@
         <ul class="nav nav-sidebar">
 
           {% for file in files %}
+          {% if selected_file == file %}
+          <li class="active"><a id="link" href="/data-save?selected={{ file }}">{{ file }}</a></li>
+          {% else %}
           <li><a id="link" href="/data-save?selected={{ file }}">{{ file }}</a></li>
+          {% endif %}
 
           <!-- the following also works: -->
           <script type="text/javascript">
           //document.write('<li><a id="link" href="/data-save?selected={{ file }}">{{ file }}</a></li>')
           </script>
-
           {% endfor %}
 
         </ul>
@@ -94,9 +98,14 @@
           <li><a href="/data-save?selected={{ selected_file }}&save=true">Save Current File</a></li>
           {% endif %}
 
-          <li><a href="">Save All Files</a></li>
+          <li><a href="/data-save?saveall=true">Save All Files</a></li>
 
-          <li><a href="">Another nav item</a></li>
+          {% if view_database == "true" %} 
+          <li class="active"><a href="/data-save?selected={{ selected_file }}&viewdb=true">Check Current Storage</a></li>
+          {% elif selected_file != "" %} 
+          <li><a href="/data-save?selected={{ selected_file }}&viewdb=true">Check Current Storage</a></li>
+          {% endif %}          
+
         </ul>
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

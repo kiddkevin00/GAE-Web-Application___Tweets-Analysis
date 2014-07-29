@@ -42,7 +42,7 @@ def parent_key(key):
 
 # define the model for Datastore 
 class Tweet(ndb.Model):
-	creat_at = ndb.StringProperty(indexed = False)
+	created_at = ndb.StringProperty(indexed = False)
 	tweet = ndb.StringProperty(indexed = False)
 
 # define the main page
@@ -69,7 +69,7 @@ class MainHandler(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('index.html')
 		self.response.write(template.render(template_values))
 
-#define a page for storing data
+# define a page for storing data
 class TweetStore(webapp2.RequestHandler):
 	def get(self):
 		global STORE_DATA_PATH
@@ -77,19 +77,25 @@ class TweetStore(webapp2.RequestHandler):
 		selected_file = self.request.get("selected")
 		logging.debug("Selected File : " + selected_file)
 		save = self.request.get("save") 
-		logging.debug("Save choice : " + save) 
-
-		# (TODO) show what is in the current Database..
-		# if (selected_file):
-		# 	tweet_query = Tweet.query(ancestor=parent_key(selected_file))	
-		# 	tweets_result = tweet_query.fetch()
-		# 	logging.debug("How many tweets in this file : " + str(len(tweets_result)))
-		# 	for tweet in tweets_result:
-		# 		logging.debug(tweet)
-		# else: 
-		# 	logging.debug("no user's input")
+		logging.debug("Save or not : " + save) 
+		save_all = self.request.get("saveall")
+		view_database = self.request.get("viewdb")
 
 		view_tweets = []
+		# view the data storing in the current Database..
+		if (view_database == "true") and (selected_file): 
+			tweet_query = Tweet.query(ancestor=parent_key(selected_file))	
+			tweets_result = tweet_query.fetch()
+			logging.debug("How many tweets store in this file at Database: " + str(len(tweets_result)))
+			for tweet_result in tweets_result:
+				logging.debug(tweet_result)
+				view_tweet = []
+				view_tweet.append(tweet_result.tweet)
+				view_tweet.append(tweet_result.created_at)
+				view_tweets.append(view_tweet)
+				logging.debug("Number of tweets for preview : " + str(len(view_tweets)))
+
+		# for storing and viewing files at the local directory 
 		files = [] 
 		for file in os.listdir(STORE_DATA_PATH):
 			logging.debug("file name : " + file)
@@ -99,7 +105,7 @@ class TweetStore(webapp2.RequestHandler):
 
 			save_tweets = []
 			files.append(tweet_parent_name)
-			if (tweet_parent_name == selected_file):
+			if ((tweet_parent_name == selected_file) and (view_database != "true")):
 				with open(STORE_DATA_PATH + file, "r") as infile:
 					# similar to "GROUP BY", but search for the same key sequentially
 					# Here groups the not empty lines together   
@@ -117,10 +123,10 @@ class TweetStore(webapp2.RequestHandler):
 									tweet.tweet = value
 									view_tweet.append(value)
 								elif field == "Created at":
-									tweet.creat_at = value
+									tweet.created_at = value
 									view_tweet.append(value)
 								else: 
-									self.redirect("/?error=1")
+									self.redirect("/?error=true")
 							view_tweets.append(view_tweet)
 							logging.debug("Number of tweets for preview : " + str(len(view_tweets)))
 							if save == "true":
@@ -128,13 +134,39 @@ class TweetStore(webapp2.RequestHandler):
 							logging.debug("Number of To_Save Tweets : " + str(len(save_tweets)))
 				logging.debug("might save a file to Datastore..")
 				ndb.put_multi(save_tweets)
+
+			if (save_all == "true"):
+				with open(STORE_DATA_PATH + file, "r") as infile:
+					# similar to "GROUP BY", but search for the same key sequentially
+					# Here groups the not empty lines together   
+					for key, group in itertools.groupby(infile, isa_group_separator):
+						if not key:
+							tweet = Tweet(parent=parent_key(tweet_parent_name))
+							for item in group:
+								field, value = item.split(" : ")
+								# strip all the white_space
+								value = value.strip()
+								# can't use "," to seperate varible like "print" does
+								logging.debug(field + " : " + value)
+								if field == "Tweet":
+									tweet.tweet = value
+								elif field == "Created at":
+									tweet.created_at = value
+								else: 
+									self.redirect("/?error=true")
+							save_tweets.append(tweet)
+							logging.debug("Number of To_Save Tweets : " + str(len(save_tweets)))
+				logging.debug("Save a file to Datastore..")
+				ndb.put_multi(save_tweets)
+
 		logging.debug("passing files paramter's size : " + str(len(files)))
 		logging.debug("passing view_tweets paramter's size: " + str(len(view_tweets)))
 		# logging.debug(view_tweets[0])
 		template_values = {
 			'files': files,
 			'selected_file': selected_file,
-			'view_tweets': view_tweets
+			'view_tweets': view_tweets,
+			'view_database': view_database
 		}
 		template = JINJA_ENVIRONMENT.get_template('data-save.html')
 		self.response.write(template.render(template_values))
