@@ -34,8 +34,30 @@
   //console.log(view_tweets[0][1]);
   //console.log(view_tweets[0][0]);
 
+  $(document).ready(function() {
+    $('a').click(function() {
+      // remove other "a" elements' class: active 
+      $(this).parent().parent().children().removeClass('active')
+      $(this).parent().addClass('active');
+      
+    });
+  });
+
 
   </script>
+
+  <style type="text/css">
+  a {
+    -webkit-transition: width 0s; /* For Safari 3.1 to 6.0 */
+    transition: width 0s;
+  }
+
+  a:hover {
+    background-color: blue;
+    border: 2px solid blue;
+    color: blue;
+  }
+  </style>
 
 </head>
 
