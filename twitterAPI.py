@@ -5,6 +5,10 @@ from tweepy.streaming import StreamListener
 from sys import argv
 import time, os
 
+# APP_KEY = ' ENTER_YOUR_APP_KEY '
+# APP_SECRET = ' ENTER_YOUR_APP_SECRET '
+# ACCESS_TOKEN = ' ENTER_YOUR_ACCESS_TOKEN '
+# ACCESS_TOKEN_SECRET = ' ENTER_YOUR_TOKEN_SECRET '
 ckey = "D4dctRLEnUieVGk5dXmdhFFqT"
 csecret = "BHPGUHFKk66cRL40MR4rXec26DsrKtXa36iii92wyBZcrWZ9tb"
 atoken = "1914184802-niSHlUKUWZaVO3h2seLSxIcrDnFy4zu5tJDNXGc"
